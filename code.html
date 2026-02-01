@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二年级语文背诵闯关</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: '楷体', sans-serif; background: #f0f8e6; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        
+        /* 首页样式 */
+        .welcome { text-align: center; padding: 50px 0; }
+        .start-btn { padding: 15px 30px; font-size: 20px; background: #4caf50; color: white; border: none; border-radius: 30px; cursor: pointer; transition: transform 0.3s; }
+        .start-btn:hover { transform: scale(1.1); }
+        
+        /* 关卡选择页样式 */
+        .progress-bar { height: 20px; background: #e0e0e0; border-radius: 10px; margin: 20px 0; }
+        .progress-fill { height: 100%; background: #4caf50; border-radius: 10px; width: 0; transition: width 0.5s; }
+        .level-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        .level-card { background: white; padding: 15px; border-radius: 10px; text-align: center; cursor: pointer; transition: transform 0.3s; }
+        .level-card:hover { transform: translateY(-5px); }
+        .level-card.completed { background: #e8f5e9; }
+        .level-card .check { color: #4caf50; font-size: 24px; }
+        
+        /* 关卡详情页样式 */
+        .level-content { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        .poem { font-size: 24px; line-height: 2; text-align: center; margin: 20px 0; }
+        .read-btn { background: #2196f3; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
+        .question { margin: 20px 0; }
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        .option { padding: 10px; background: #f5f5f5; border-radius: 5px; cursor: pointer; }
+        .option:hover { background: #e0e0e0; }
+        .option.selected { background: #bbdefb; }
+        .submit-btn { padding: 10px 20px; background: #ff9800; color: white; border: none; border-radius: 20px; cursor: pointer; margin-top: 10px; }
+        
+        /* 反馈消息样式 */
+        .feedback { margin-top: 15px; padding: 10px; border-radius: 5px; text-align: center; display: none; }
+        .feedback.success { background: #e8f5e9; color: #2e7d32; display: block; }
+        .feedback.error { background: #ffebee; color: #c62828; display: block; }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <!-- 首页 -->
+        <div v-if="currentView === 'welcome'">
+            <div class="welcome">
+                <h1>书山有路勤为径</h1>
+                <p>二年级语文背诵闯关</p>
+                <button class="start-btn" @click="currentView = 'levels'">开始闯关</button>
+            </div>
+        </div>
+
+        <!-- 关卡选择页 -->
+        <div v-else-if="currentView === 'levels'">
+            <h2>选择关卡</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" :style="{width: progress + '%'}"></div>
+            </div>
+            <div class="level-list">
+                <div v-for="(level, index) in levels" :key="index" 
+                     class="level-card" :class="{completed: level.completed}"
+                     @click="selectLevel(index)">
+                    <div class="check" v-if="level.completed">√</div>
+                    <div v-else>□</div>
+                    <p>{{ level.name }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关卡详情页 -->
+        <div v-else-if="currentView === 'levelDetail'">
+            <h2>第{{currentLevel + 1}}关：{{levels[currentLevel].name}}</h2>
+            <div class="level-content">
+                <div class="poem">{{levels[currentLevel].content}}</div>
+                <button class="read-btn" @click="readPoem">朗读</button>
+                <div class="question">
+                    <p>题目：{{levels[currentLevel].question}}</p>
+                    <div class="options">
+                        <div v-for="(option, index) in levels[currentLevel].options" :key="index" 
+                             class="option" :class="{selected: levels[currentLevel].selected === index}"
+                             @click="selectOption(index)">{{option}}</div>
+                    </div>
+                    <button class="submit-btn" @click="submitAnswer">提交答案</button>
+                    <div class="feedback" :class="feedback.class">{{feedback.message}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                currentView: 'welcome',
+                currentLevel: 0,
+                progress: 0,
+                feedback: { message: '', class: '' },
+                levels: [
+                    { 
+                        name: '村居', 
+                        content: '草长莺飞二月天，拂堤杨柳醉春烟。儿童散学归来早，忙趁东风放纸鸢。', 
+                        question: '诗中"儿童散学归来早"的下一句是什么？', 
+                        options: ['忙趁东风放纸鸢', '拂堤杨柳醉春烟', '草长莺飞二月天'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '咏柳', 
+                        content: '碧玉妆成一树高，万条垂下绿丝绦。不知细叶谁裁出，二月春风似剪刀。', 
+                        question: '诗中"碧玉妆成一树高"的下一句是什么？', 
+                        options: ['万条垂下绿丝绦', '不知细叶谁裁出', '二月春风似剪刀'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '赋得古原草送别', 
+                        content: '离离原上草，一岁一枯荣。野火烧不尽，春风吹又生。远芳侵古道，晴翠接荒城。又送王孙去，萋萋满别情。', 
+                        question: '诗中"野火烧不尽"的下一句是什么？', 
+                        options: ['春风吹又生', '远芳侵古道', '晴翠接荒城'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '传统节日', 
+                        content: '春节到，人欢笑。贴窗花，放鞭炮。元宵节，看花灯，大街小巷人如潮。清明节，雨纷纷，先人墓前去祭扫。过端午，赛龙舟，粽子艾香满堂飘。七月七，来乞巧，牛郎织女会鹊桥。过中秋，吃月饼，十五圆月当空照。重阳节，要敬老，踏秋赏菊去登高。转眼又是新春到，全家团圆真热闹。', 
+                        question: '诗中"过端午，赛龙舟"后面是什么？', 
+                        options: ['粽子艾香满堂飘', '大街小巷人如潮', '先人墓前去祭扫'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '神州谣', 
+                        content: '我神州，称中华，山川美，可入画。黄河奔，长江涌，长城长，珠峰耸。台湾岛，隔海峡，与大陆，是一家。各民族，情谊浓，齐奋发，共繁荣。', 
+                        question: '诗中"黄河奔，长江涌"后面是什么？', 
+                        options: ['长城长，珠峰耸', '台湾岛，隔海峡', '各民族，情谊浓'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '日积月累（一）', 
+                        content: '予人玫瑰，手有余香。平时肯帮人，急时有人帮。与其锦上添花，不如雪中送炭。', 
+                        question: '"予人玫瑰，手有余香"的意思是什么？', 
+                        options: ['帮助别人自己也会快乐', '玫瑰很香', '送人玫瑰很贵'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '日积月累（二）', 
+                        content: '失信不立。小信成则大信立。', 
+                        question: '"小信成则大信立"的意思是什么？', 
+                        options: ['小事情守信用，大事情也会守信用', '小事情不重要', '大事情才重要'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '晓出净慈寺送林子方', 
+                        content: '毕竟西湖六月中，风光不与四时同。接天莲叶无穷碧，映日荷花别样红。', 
+                        question: '诗中"接天莲叶无穷碧"的下一句是什么？', 
+                        options: ['映日荷花别样红', '毕竟西湖六月中', '风光不与四时同'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '绝句', 
+                        content: '两个黄鹂鸣翠柳，一行白鹭上青天。窗含西岭千秋雪，门泊东吴万里船。', 
+                        question: '诗中"两个黄鹂鸣翠柳"的下一句是什么？', 
+                        options: ['一行白鹭上青天', '窗含西岭千秋雪', '门泊东吴万里船'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '雷雨', 
+                        content: '满天的乌云，黑沉沉地压下来。树上的叶子一动不动，蝉一声也不叫。忽然一阵大风，吹得树枝乱摆。一只蜘蛛从网上垂下来，逃走了。', 
+                        question: '文中"忽然一阵大风"后面发生了什么？', 
+                        options: ['吹得树枝乱摆', '蝉一声也不叫', '满天的乌云'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '悯农', 
+                        content: '锄禾日当午，汗滴禾下土。谁知盘中餐，粒粒皆辛苦。', 
+                        question: '诗中"锄禾日当午"的下一句是什么？', 
+                        options: ['汗滴禾下土', '谁知盘中餐', '粒粒皆辛苦'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '二十四节气歌', 
+                        content: '春雨惊春清谷天，夏满芒夏暑相连。秋处露秋寒霜降，冬雪雪冬小大寒。', 
+                        question: '"春雨惊春清谷天"包含哪些节气？', 
+                        options: ['立春、雨水、惊蛰、春分、清明、谷雨', '夏满芒夏暑相连', '秋处露秋寒霜降'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '舟夜书所见', 
+                        content: '月黑见渔灯，孤光一点萤。微微风簇浪，散作满河星。', 
+                        question: '诗中"月黑见渔灯"的下一句是什么？', 
+                        options: ['孤光一点萤', '微微风簇浪', '散作满河星'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    },
+                    { 
+                        name: '弟子规', 
+                        content: '弟子规，圣人训。首孝悌，次见闻。知某数，识某文。', 
+                        question: '"弟子规，圣人训"的下一句是什么？', 
+                        options: ['首孝悌，次见闻', '知某数，识某文', '弟子规，圣人训'], 
+                        answer: 0, 
+                        selected: null, 
+                        completed: false 
+                    }
+                ]
+            },
+            methods: {
+                selectLevel(index) {
+                    this.currentLevel = index;
+                    this.currentView = 'levelDetail';
+                    this.feedback.message = '';
+                    this.feedback.class = '';
+                },
+                selectOption(index) {
+                    this.levels[this.currentLevel].selected = index;
+                },
+                submitAnswer() {
+                    const level = this.levels[this.currentLevel];
+                    
+                    if (level.selected === null) {
+                        this.feedback.message = '请先选择一个答案！';
+                        this.feedback.class = 'error';
+                        return;
+                    }
+                    
+                    if (level.selected === level.answer) {
+                        level.completed = true;
+                        this.progress = (this.levels.filter(l => l.completed).length / this.levels.length) * 100;
+                        this.feedback.message = `恭喜通过！获得"${level.name}小能手"徽章！`;
+                        this.feedback.class = 'success';
+                        
+                        // 1秒后返回关卡选择页
+                        setTimeout(() => {
+                            this.currentView = 'levels';
+                            this.feedback.message = '';
+                            this.feedback.class = '';
+                        }, 1500);
+                    } else {
+                        this.feedback.message = '答案不对，再试一次！';
+                        this.feedback.class = 'error';
+                    }
+                },
+                readPoem() {
+                    const utterance = new SpeechSynthesisUtterance(this.levels[this.currentLevel].content);
+                    speechSynthesis.speak(utterance);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
