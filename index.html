@@ -2,272 +2,626 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>二年级语文背诵闯关</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>二年级语文背诵闯关 - 男声版</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: '楷体', sans-serif; background: #f0f8e6; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        
-        /* 首页样式 */
-        .welcome { text-align: center; padding: 50px 0; }
-        .start-btn { padding: 15px 30px; font-size: 20px; background: #4caf50; color: white; border: none; border-radius: 30px; cursor: pointer; transition: transform 0.3s; }
-        .start-btn:hover { transform: scale(1.1); }
-        
-        /* 关卡选择页样式 */
-        .progress-bar { height: 20px; background: #e0e0e0; border-radius: 10px; margin: 20px 0; }
-        .progress-fill { height: 100%; background: #4caf50; border-radius: 10px; width: 0; transition: width 0.5s; }
-        .level-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
-        .level-card { background: white; padding: 15px; border-radius: 10px; text-align: center; cursor: pointer; transition: transform 0.3s; }
-        .level-card:hover { transform: translateY(-5px); }
-        .level-card.completed { background: #e8f5e9; }
-        .level-card .check { color: #4caf50; font-size: 24px; }
-        
-        /* 关卡详情页样式 */
-        .level-content { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; }
-        .poem { font-size: 24px; line-height: 2; text-align: center; margin: 20px 0; }
-        .read-btn { background: #2196f3; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
-        .question { margin: 20px 0; }
-        .options { display: flex; flex-direction: column; gap: 10px; }
-        .option { padding: 10px; background: #f5f5f5; border-radius: 5px; cursor: pointer; }
-        .option:hover { background: #e0e0e0; }
-        .option.selected { background: #bbdefb; }
-        .submit-btn { padding: 10px 20px; background: #ff9800; color: white; border: none; border-radius: 20px; cursor: pointer; margin-top: 10px; }
-        
-        /* 反馈消息样式 */
-        .feedback { margin-top: 15px; padding: 10px; border-radius: 5px; text-align: center; display: none; }
-        .feedback.success { background: #e8f5e9; color: #2e7d32; display: block; }
-        .feedback.error { background: #ffebee; color: #c62828; display: block; }
+        :root {
+            --primary-color: #4caf50;
+            --primary-hover: #43a047;
+            --secondary-color: #2196f3;
+            --accent-color: #ff9800;
+            --bg-color: #f0f8e6;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --success-color: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-color: #ffebee;
+            --error-text: #c62828;
+            --note-bg: #fff8e1; /* 讲解背景色：淡黄 */
+            --note-border: #ffe082;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: "KaiTi", "楷体", "STKaiti", serif; 
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        /* 主容器 */
+        .app-container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow: hidden;
+            position: relative;
+            min-height: 650px;
+            display: flex;
+            flex-direction: column;
+        }
+        /* 通用动画 */
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden { display: none !important; }
+        /* 按钮样式 */
+        .btn {
+            border: none;
+            border-radius: 30px;
+            padding: 12px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-weight: bold;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+        }
+        .btn:active { transform: translateY(2px); box-shadow: none; }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .btn-secondary { background: var(--secondary-color); color: white; }
+        .btn-accent { background: var(--accent-color); color: white; }
+        .btn-back { 
+            position: absolute; 
+            top: 20px; 
+            left: 20px; 
+            background: #eee; 
+            color: #555; 
+            padding: 8px 15px; 
+            font-size: 16px;
+            z-index: 10;
+        }
+        /* 首页视图 */
+        #view-welcome {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+        }
+        .welcome-title { font-size: 36px; margin-bottom: 10px; color: var(--primary-color); }
+        .welcome-subtitle { font-size: 22px; color: var(--text-sub); margin-bottom: 40px; }
+        .mascot { font-size: 80px; margin-bottom: 20px; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        /* 关卡选择视图 */
+        #view-levels { padding: 40px 20px 20px; }
+        .header-text { text-align: center; margin-bottom: 20px; font-size: 24px; }
+        .progress-container { margin: 20px 0; }
+        .progress-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; color: var(--text-sub); }
+        .progress-track { height: 12px; background: #e0e0e0; border-radius: 6px; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #4caf50, #8bc34a); width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+        .level-card {
+            background: var(--card-bg);
+            border: 2px solid #eee;
+            border-radius: var(--radius);
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+        .level-card:hover { border-color: var(--primary-color); transform: translateY(-3px); }
+        .level-card.completed { background: var(--success-color); border-color: #81c784; }
+        .level-card .status-icon { font-size: 24px; color: #ccc; margin-bottom: 5px; }
+        .level-card.completed .status-icon { color: var(--success-text); }
+        .level-name { font-size: 16px; font-weight: bold; }
+        /* 游戏视图 */
+        #view-game { padding: 60px 20px 20px; display: flex; flex-direction: column; align-items: center; }
+        /* 标题和作者 */
+        .game-header { text-align: center; margin-bottom: 15px; width: 100%; }
+        .game-title { font-size: 22px; color: var(--text-main); margin-bottom: 5px; }
+        .game-author { font-size: 16px; color: #888; font-style: italic; }
+        .content-card {
+            background: var(--card-bg);
+            width: 100%;
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .poem-text {
+            font-size: 22px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            white-space: pre-wrap; 
+        }
+        /* 讲解区域 */
+        .explanation-card {
+            background: var(--note-bg);
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: var(--radius);
+            border: 1px solid var(--note-border);
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .explanation-label {
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--accent-color);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .explanation-text {
+            font-size: 15px;
+            color: #5d4037;
+            line-height: 1.6;
+            margin-top: 5px;
+            text-align: justify;
+        }
+        .question-card {
+            width: 100%;
+            background: #fff;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: left;
+        }
+        .question-text { font-size: 18px; font-weight: bold; margin-bottom: 15px; border-left: 4px solid var(--accent-color); padding-left: 10px; }
+        .options-list { display: flex; flex-direction: column; gap: 10px; }
+        .option-item {
+            padding: 12px 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 16px;
+        }
+        .option-item:hover { background: #e0e0e0; }
+        .option-item.selected { background: #e3f2fd; border: 2px solid var(--secondary-color); color: var(--secondary-color); font-weight: bold; }
+        /* 反馈区域 */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+        }
+        .feedback-area.show { opacity: 1; transform: translateY(0); }
+        .feedback-area.success { background: var(--success-color); color: var(--success-text); }
+        .feedback-area.error { background: var(--error-color); color: var(--error-text); }
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+        @media (max-width: 480px) {
+            .level-grid { grid-template-columns: repeat(2, 1fr); }
+            .poem-text { font-size: 18px; }
+            .welcome-title { font-size: 28px; }
+            .explanation-text { font-size: 14px; }
+        }
     </style>
 </head>
 <body>
-    <div class="container" id="app">
+    <div class="app-container">
+        <canvas id="confetti-canvas"></canvas>
         <!-- 首页 -->
-        <div v-if="currentView === 'welcome'">
-            <div class="welcome">
-                <h1>书山有路勤为径</h1>
-                <p>二年级语文背诵闯关</p>
-                <button class="start-btn" @click="currentView = 'levels'">开始闯关</button>
-            </div>
-        </div>
-
+        <section id="view-welcome" class="fade-in">
+            <div class="mascot">📚</div>
+            <h1 class="welcome-title">书山有路勤为径</h1>
+            <p class="welcome-subtitle">二年级语文背诵闯关 (男声版)</p>
+            <button class="btn btn-primary" onclick="app.showLevels()">开始闯关</button>
+        </section>
         <!-- 关卡选择页 -->
-        <div v-else-if="currentView === 'levels'">
-            <h2>选择关卡</h2>
-            <div class="progress-bar">
-                <div class="progress-fill" :style="{width: progress + '%'}"></div>
-            </div>
-            <div class="level-list">
-                <div v-for="(level, index) in levels" :key="index" 
-                     class="level-card" :class="{completed: level.completed}"
-                     @click="selectLevel(index)">
-                    <div class="check" v-if="level.completed">√</div>
-                    <div v-else>□</div>
-                    <p>{{ level.name }}</p>
+        <section id="view-levels" class="hidden">
+            <h2 class="header-text">选择关卡</h2>
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>闯关进度</span>
+                    <span id="progress-text">0/15</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-bar" id="progress-bar"></div>
                 </div>
             </div>
-        </div>
-
-        <!-- 关卡详情页 -->
-        <div v-else-if="currentView === 'levelDetail'">
-            <h2>第{{currentLevel + 1}}关：{{levels[currentLevel].name}}</h2>
-            <div class="level-content">
-                <div class="poem">{{levels[currentLevel].content}}</div>
-                <button class="read-btn" @click="readPoem">朗读</button>
-                <div class="question">
-                    <p>题目：{{levels[currentLevel].question}}</p>
-                    <div class="options">
-                        <div v-for="(option, index) in levels[currentLevel].options" :key="index" 
-                             class="option" :class="{selected: levels[currentLevel].selected === index}"
-                             @click="selectOption(index)">{{option}}</div>
-                    </div>
-                    <button class="submit-btn" @click="submitAnswer">提交答案</button>
-                    <div class="feedback" :class="feedback.class">{{feedback.message}}</div>
-                </div>
+            <div class="level-grid" id="level-list">
+                <!-- 关卡卡片JS生成 -->
             </div>
-        </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-secondary" onclick="app.showWelcome()" style="background: #9e9e9e;">返回首页</button>
+            </div>
+        </section>
+        <!-- 游戏详情页 -->
+        <section id="view-game" class="hidden">
+            <button class="btn btn-back" onclick="app.showLevels()">← 返回列表</button>
+            <div class="game-header">
+                <h3 id="game-title" class="game-title"></h3>
+                <div id="game-author" class="game-author"></div>
+            </div>
+            <div class="content-card">
+                <div id="game-content" class="poem-text"></div>
+                <button class="btn btn-secondary" onclick="app.readAloud()">🔊 男生朗读</button>
+            </div>
+            <!-- 讲解卡片 -->
+            <div class="explanation-card">
+                <div class="explanation-label">💡 老师讲解</div>
+                <div id="game-explanation" class="explanation-text"></div>
+            </div>
+            <div class="question-card">
+                <div id="game-question" class="question-text"></div>
+                <div id="game-options" class="options-list"></div>
+                <div id="feedback-msg" class="feedback-area"></div>
+                <button id="submit-btn" class="btn btn-accent" style="width: 100%; margin-top: 15px;" onclick="app.submitAnswer()">提交答案</button>
+            </div>
+        </section>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <script>
-        new Vue({
-            el: '#app',
-            data: {
-                currentView: 'welcome',
-                currentLevel: 0,
-                progress: 0,
-                feedback: { message: '', class: '' },
-                levels: [
-                    { 
-                        name: '村居', 
-                        content: '草长莺飞二月天，拂堤杨柳醉春烟。儿童散学归来早，忙趁东风放纸鸢。', 
-                        question: '诗中"儿童散学归来早"的下一句是什么？', 
-                        options: ['忙趁东风放纸鸢', '拂堤杨柳醉春烟', '草长莺飞二月天'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '咏柳', 
-                        content: '碧玉妆成一树高，万条垂下绿丝绦。不知细叶谁裁出，二月春风似剪刀。', 
-                        question: '诗中"碧玉妆成一树高"的下一句是什么？', 
-                        options: ['万条垂下绿丝绦', '不知细叶谁裁出', '二月春风似剪刀'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '赋得古原草送别', 
-                        content: '离离原上草，一岁一枯荣。野火烧不尽，春风吹又生。远芳侵古道，晴翠接荒城。又送王孙去，萋萋满别情。', 
-                        question: '诗中"野火烧不尽"的下一句是什么？', 
-                        options: ['春风吹又生', '远芳侵古道', '晴翠接荒城'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '传统节日', 
-                        content: '春节到，人欢笑。贴窗花，放鞭炮。元宵节，看花灯，大街小巷人如潮。清明节，雨纷纷，先人墓前去祭扫。过端午，赛龙舟，粽子艾香满堂飘。七月七，来乞巧，牛郎织女会鹊桥。过中秋，吃月饼，十五圆月当空照。重阳节，要敬老，踏秋赏菊去登高。转眼又是新春到，全家团圆真热闹。', 
-                        question: '诗中"过端午，赛龙舟"后面是什么？', 
-                        options: ['粽子艾香满堂飘', '大街小巷人如潮', '先人墓前去祭扫'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '神州谣', 
-                        content: '我神州，称中华，山川美，可入画。黄河奔，长江涌，长城长，珠峰耸。台湾岛，隔海峡，与大陆，是一家。各民族，情谊浓，齐奋发，共繁荣。', 
-                        question: '诗中"黄河奔，长江涌"后面是什么？', 
-                        options: ['长城长，珠峰耸', '台湾岛，隔海峡', '各民族，情谊浓'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '日积月累（一）', 
-                        content: '予人玫瑰，手有余香。平时肯帮人，急时有人帮。与其锦上添花，不如雪中送炭。', 
-                        question: '"予人玫瑰，手有余香"的意思是什么？', 
-                        options: ['帮助别人自己也会快乐', '玫瑰很香', '送人玫瑰很贵'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '日积月累（二）', 
-                        content: '失信不立。小信成则大信立。', 
-                        question: '"小信成则大信立"的意思是什么？', 
-                        options: ['小事情守信用，大事情也会守信用', '小事情不重要', '大事情才重要'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '晓出净慈寺送林子方', 
-                        content: '毕竟西湖六月中，风光不与四时同。接天莲叶无穷碧，映日荷花别样红。', 
-                        question: '诗中"接天莲叶无穷碧"的下一句是什么？', 
-                        options: ['映日荷花别样红', '毕竟西湖六月中', '风光不与四时同'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '绝句', 
-                        content: '两个黄鹂鸣翠柳，一行白鹭上青天。窗含西岭千秋雪，门泊东吴万里船。', 
-                        question: '诗中"两个黄鹂鸣翠柳"的下一句是什么？', 
-                        options: ['一行白鹭上青天', '窗含西岭千秋雪', '门泊东吴万里船'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '雷雨', 
-                        content: '满天的乌云，黑沉沉地压下来。树上的叶子一动不动，蝉一声也不叫。忽然一阵大风，吹得树枝乱摆。一只蜘蛛从网上垂下来，逃走了。', 
-                        question: '文中"忽然一阵大风"后面发生了什么？', 
-                        options: ['吹得树枝乱摆', '蝉一声也不叫', '满天的乌云'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '悯农', 
-                        content: '锄禾日当午，汗滴禾下土。谁知盘中餐，粒粒皆辛苦。', 
-                        question: '诗中"锄禾日当午"的下一句是什么？', 
-                        options: ['汗滴禾下土', '谁知盘中餐', '粒粒皆辛苦'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '二十四节气歌', 
-                        content: '春雨惊春清谷天，夏满芒夏暑相连。秋处露秋寒霜降，冬雪雪冬小大寒。', 
-                        question: '"春雨惊春清谷天"包含哪些节气？', 
-                        options: ['立春、雨水、惊蛰、春分、清明、谷雨', '夏满芒夏暑相连', '秋处露秋寒霜降'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '舟夜书所见', 
-                        content: '月黑见渔灯，孤光一点萤。微微风簇浪，散作满河星。', 
-                        question: '诗中"月黑见渔灯"的下一句是什么？', 
-                        options: ['孤光一点萤', '微微风簇浪', '散作满河星'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    },
-                    { 
-                        name: '弟子规', 
-                        content: '弟子规，圣人训。首孝悌，次见闻。知某数，识某文。', 
-                        question: '"弟子规，圣人训"的下一句是什么？', 
-                        options: ['首孝悌，次见闻', '知某数，识某文', '弟子规，圣人训'], 
-                        answer: 0, 
-                        selected: null, 
-                        completed: false 
-                    }
-                ]
+        // 游戏数据（包含所有更新：作者、解释、内容）
+        const gameData = [
+            { 
+                name: '村居', 
+                author: '[清] 高鼎',
+                content: '草长莺飞二月天，拂堤杨柳醉春烟。\n儿童散学归来早，忙趁东风放纸鸢。', 
+                explanation: '这首诗描写了春天江南明媚的景色。草木生长，黄莺飞翔，杨柳在春雾中陶醉。孩子们放学后急忙回家，趁着东风快乐地放起了风筝。',
+                question: '诗中"儿童散学归来早"的下一句是什么？', 
+                options: ['忙趁东风放纸鸢', '拂堤杨柳醉春烟', '草长莺飞二月天'], 
+                answer: 0 
             },
-            methods: {
-                selectLevel(index) {
-                    this.currentLevel = index;
-                    this.currentView = 'levelDetail';
-                    this.feedback.message = '';
-                    this.feedback.class = '';
-                },
-                selectOption(index) {
-                    this.levels[this.currentLevel].selected = index;
-                },
-                submitAnswer() {
-                    const level = this.levels[this.currentLevel];
-                    
-                    if (level.selected === null) {
-                        this.feedback.message = '请先选择一个答案！';
-                        this.feedback.class = 'error';
-                        return;
+            { 
+                name: '咏柳', 
+                author: '[唐] 贺知章',
+                content: '碧玉妆成一树高，万条垂下绿丝绦。\n不知细叶谁裁出，二月春风似剪刀。', 
+                explanation: '这是一首赞美柳树的诗。高高的柳树长满了翠绿的新叶，像碧玉装扮的一样。千万条柳枝垂下来像绿色的丝带。这细细的叶子是谁裁出来的呢？原来是二月的春风像剪刀一样剪出来的。',
+                question: '诗中"碧玉妆成一树高"的下一句是什么？', 
+                options: ['万条垂下绿丝绦', '不知细叶谁裁出', '二月春风似剪刀'], 
+                answer: 0 
+            },
+            { 
+                name: '赋得古原草送别', 
+                author: '[唐] 白居易',
+                content: '离离原上草，一岁一枯荣。\n野火烧不尽，春风吹又生。\n远芳侵古道，晴翠接荒城。\n又送王孙去，萋萋满别情。', 
+                explanation: '这首诗赞美了野草顽强的生命力。原野上的草每年都会枯萎一次，茂盛一次。野火虽然能烧毁它的叶子，但根还在，第二年春风一吹，它又重新生长出来了。',
+                question: '诗中"野火烧不尽"的下一句是什么？', 
+                options: ['春风吹又生', '远芳侵古道', '晴翠接荒城'], 
+                answer: 0 
+            },
+            { 
+                name: '传统节日', 
+                author: '课文选编',
+                content: '春节到，人欢笑。贴窗花，放鞭炮。\n元宵节，看花灯，大街小巷人如潮。\n清明节，雨纷纷，先人墓前去祭扫。\n过端午，赛龙舟，粽子艾香满堂飘。\n七月七，来乞巧，牛郎织女会鹊桥。\n过中秋，吃月饼，十五圆月当空照。\n重阳节，要敬老，踏秋赏菊去登高。\n转眼又是新春到，全家团圆真热闹。', 
+                explanation: '这是一首介绍中国传统节日的儿歌。文中按时间顺序讲述了春节、元宵节、清明节、端午节、七夕、中秋节和重阳节的习俗，表达了中华文化的丰富多彩。',
+                question: '诗中"过端午，赛龙舟"后面是什么？', 
+                options: ['粽子艾香满堂飘', '大街小巷人如潮', '先人墓前去祭扫'], 
+                answer: 0 
+            },
+            { 
+                name: '神州谣', 
+                author: '课文选编',
+                content: '我神州，称中华，山川美，可入画。\n黄河奔，长江涌，长城长，珠峰耸。\n台湾岛，隔海峡，与大陆，是一家。\n各民族，情谊浓，齐奋发，共繁荣。', 
+                explanation: '这篇韵文歌颂了祖国的壮丽河山。黄河、长江奔腾不息，长城长，珠穆朗玛峰高耸。台湾是我们不可分割的一部分，各民族团结一心，共同发展。',
+                question: '诗中"黄河奔，长江涌"后面是什么？', 
+                options: ['长城长，珠峰耸', '台湾岛，隔海峡', '各民族，情谊浓'], 
+                answer: 0 
+            },
+            { 
+                name: '日积月累（一）', 
+                author: '谚语',
+                content: '予人玫瑰，手有余香。\n平时肯帮人，急时有人帮。\n与其锦上添花，不如雪中送炭。', 
+                explanation: '"予人玫瑰，手有余香"的意思是：帮助别人，自己也会感到快乐。"雪中送炭"比喻在别人急需时给以物质上或精神上的帮助。',
+                question: '"予人玫瑰，手有余香"的意思是什么？', 
+                options: ['帮助别人自己也会快乐', '玫瑰很香', '送人玫瑰很贵'], 
+                answer: 0 
+            },
+            { 
+                name: '日积月累（二）', 
+                author: '《左传》',
+                content: '失信不立。\n小信成则大信立。', 
+                explanation: '"失信不立"的意思是说，不讲信用的人就无法在社会上立足。"小信成则大信立"意思是小事情讲信用，就能建立起大的信用，做人要诚实守信。',
+                question: '"小信成则大信立"的意思是什么？', 
+                options: ['小事情守信用，大事情也会守信用', '小事情不重要', '大事情才重要'], 
+                answer: 0 
+            },
+            { 
+                name: '晓出净慈寺送林子方', 
+                author: '[宋] 杨万里',
+                content: '毕竟西湖六月中，风光不与四时同。\n接天莲叶无穷碧，映日荷花别样红。', 
+                explanation: '这首诗描写了西湖六月美丽的风光。莲叶无边无际，与天相接，一片碧绿；荷花在阳光的照耀下，显得格外鲜艳娇红。',
+                question: '诗中"接天莲叶无穷碧"的下一句是什么？', 
+                options: ['映日荷花别样红', '毕竟西湖六月中', '风光不与四时同'], 
+                answer: 0 
+            },
+            { 
+                name: '绝句', 
+                author: '[唐] 杜甫',
+                content: '两个黄鹂鸣翠柳，一行白鹭上青天。\n窗含西岭千秋雪，门泊东吴万里船。', 
+                explanation: '这首诗描绘了草堂周围明媚秀丽的春天景色。黄鹂在翠绿的柳树上鸣叫，白鹭飞上蓝天。窗口可以看到西岭千年不化的积雪，门外停泊着来自东吴的船只。',
+                question: '诗中"两个黄鹂鸣翠柳"的下一句是什么？', 
+                options: ['一行白鹭上青天', '窗含西岭千秋雪', '门泊东吴万里船'], 
+                answer: 0 
+            },
+            { 
+                name: '雷雨', 
+                author: '课文选编',
+                content: '满天的乌云，黑沉沉地压下来。\n树上的叶子一动不动，蝉一声也不叫。\n忽然一阵大风，吹得树枝乱摆。\n一只蜘蛛从网上垂下来，逃走了。', 
+                explanation: '这段话描写了雷雨前的景象。乌云密布，空气闷热，没有一丝风。忽然刮起了大风，树枝乱摆，连蜘蛛都吓得逃走了，说明大雨马上就要来了。',
+                question: '文中"忽然一阵大风"后面发生了什么？', 
+                options: ['吹得树枝乱摆', '蝉一声也不叫', '满天的乌云'], 
+                answer: 0 
+            },
+            { 
+                name: '悯农', 
+                author: '[唐] 李绅',
+                content: '锄禾日当午，汗滴禾下土。\n谁知盘中餐，粒粒皆辛苦。', 
+                explanation: '这首诗告诉我们农民种田很辛苦。正午时分，农民还在田里锄草，汗水滴到禾苗下的土里。我们碗里的米饭，每一粒都包含了农民的辛苦，所以要珍惜粮食。',
+                question: '诗中"锄禾日当午"的下一句是什么？', 
+                options: ['汗滴禾下土', '谁知盘中餐', '粒粒皆辛苦'], 
+                answer: 0 
+            },
+            { 
+                name: '二十四节气歌', 
+                author: '农谚',
+                content: '春雨惊春清谷天，夏满芒夏暑相连。\n秋处露秋寒霜降，冬雪雪冬小大寒。', 
+                explanation: '这是为了便于记忆二十四节气而编成的歌诀。它按顺序包含了春、夏、秋、冬四季的二十四个节气，比如立春、雨水、清明、冬至等，指导农业生产。',
+                question: '"春雨惊春清谷天"包含哪些节气？', 
+                options: ['立春、雨水、惊蛰、春分、清明、谷雨', '夏满芒夏暑相连', '秋处露秋寒霜降'], 
+                answer: 0 
+            },
+            { 
+                name: '舟夜书所见', 
+                author: '[清] 查慎行',
+                content: '月黑见渔灯，孤光一点萤。\n微微风簇浪，散作满河星。', 
+                explanation: '这首诗描写了夜晚江上的景色。漆黑的夜里，看见一盏渔灯，像萤火虫一样微弱。微风吹起波浪，灯光倒映在水面，散开像满河的星星。',
+                question: '诗中"月黑见渔灯"的下一句是什么？', 
+                options: ['孤光一点萤', '微微风簇浪', '散作满河星'], 
+                answer: 0 
+            },
+            { 
+                name: '弟子规', 
+                author: '[清] 李毓秀',
+                content: '弟子规，圣人训。\n首孝悌，次见闻。\n知某数，识某文。', 
+                explanation: '《弟子规》是启蒙养正的好读物。这几句的意思是：弟子规是依据圣人的教诲编成的。首先要学会孝顺父母、友爱兄弟姐妹，其次要学习看到和听到的知识，还要学习算术和文字。',
+                question: '"弟子规，圣人训"的下一句是什么？', 
+                options: ['首孝悌，次见闻', '知某数，识某文', '弟子规，圣人训'], 
+                answer: 0 
+            }
+        ];
+        const app = {
+            state: {
+                currentView: 'welcome',
+                completedLevels: [],
+                currentLevelIndex: 0,
+                selectedOption: null
+            },
+            init() {
+                const savedProgress = localStorage.getItem('chineseGameProgress');
+                if (savedProgress) {
+                    this.state.completedLevels = JSON.parse(savedProgress);
+                }
+                this.renderLevels();
+            },
+            saveProgress() {
+                localStorage.setItem('chineseGameProgress', JSON.stringify(this.state.completedLevels));
+                this.renderLevels();
+            },
+            switchView(viewId) {
+                ['view-welcome', 'view-levels', 'view-game'].forEach(id => {
+                    document.getElementById(id).classList.add('hidden');
+                });
+                document.getElementById(viewId).classList.remove('hidden');
+                document.getElementById(viewId).classList.add('fade-in');
+            },
+            showWelcome() {
+                this.switchView('view-welcome');
+            },
+            showLevels() {
+                this.updateProgressUI();
+                this.switchView('view-levels');
+            },
+            startLevel(index) {
+                this.state.currentLevelIndex = index;
+                this.state.selectedOption = null;
+                const level = gameData[index];
+                // 更新标题和作者
+                document.getElementById('game-title').innerText = level.name;
+                document.getElementById('game-author').innerText = level.author;
+                // 更新内容和讲解
+                document.getElementById('game-content').innerText = level.content;
+                document.getElementById('game-explanation').innerText = level.explanation;
+                document.getElementById('game-question').innerText = `题目：${level.question}`;
+                // 重置UI
+                const feedbackEl = document.getElementById('feedback-msg');
+                feedbackEl.className = 'feedback-area';
+                feedbackEl.innerText = '';
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.disabled = false;
+                submitBtn.innerText = '提交答案';
+                submitBtn.style.opacity = '1';
+                // 生成选项
+                const optionsContainer = document.getElementById('game-options');
+                optionsContainer.innerHTML = '';
+                level.options.forEach((opt, idx) => {
+                    const el = document.createElement('div');
+                    el.className = 'option-item';
+                    el.innerText = opt;
+                    el.onclick = () => this.selectOption(idx, el);
+                    optionsContainer.appendChild(el);
+                });
+                this.switchView('view-game');
+            },
+            selectOption(index, element) {
+                document.querySelectorAll('.option-item').forEach(el => el.classList.remove('selected'));
+                element.classList.add('selected');
+                this.state.selectedOption = index;
+            },
+            submitAnswer() {
+                const level = gameData[this.state.currentLevelIndex];
+                const feedbackEl = document.getElementById('feedback-msg');
+                const submitBtn = document.getElementById('submit-btn');
+                if (this.state.selectedOption === null) {
+                    this.showFeedback('请先选择一个答案！', 'error');
+                    return;
+                }
+                if (this.state.selectedOption === level.answer) {
+                    this.showFeedback(`恭喜通过！获得"${level.name}小能手"徽章！`, 'success');
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = '已通关';
+                    submitBtn.style.opacity = '0.6';
+                    if (!this.state.completedLevels.includes(this.state.currentLevelIndex)) {
+                        this.state.completedLevels.push(this.state.currentLevelIndex);
+                        this.saveProgress();
+                        fireConfetti();
                     }
-                    
-                    if (level.selected === level.answer) {
-                        level.completed = true;
-                        this.progress = (this.levels.filter(l => l.completed).length / this.levels.length) * 100;
-                        this.feedback.message = `恭喜通过！获得"${level.name}小能手"徽章！`;
-                        this.feedback.class = 'success';
-                        
-                        // 1秒后返回关卡选择页
-                        setTimeout(() => {
-                            this.currentView = 'levels';
-                            this.feedback.message = '';
-                            this.feedback.class = '';
-                        }, 1500);
-                    } else {
-                        this.feedback.message = '答案不对，再试一次！';
-                        this.feedback.class = 'error';
+                    setTimeout(() => {
+                        this.showLevels();
+                    }, 2000);
+                } else {
+                    this.showFeedback('答案不对，再试一次！', 'error');
+                    document.querySelector('.content-card').animate([
+                        { transform: 'translateX(0)' },
+                        { transform: 'translateX(-10px)' },
+                        { transform: 'translateX(10px)' },
+                        { transform: 'translateX(0)' }
+                    ], { duration: 300 });
+                }
+            },
+            showFeedback(msg, type) {
+                const el = document.getElementById('feedback-msg');
+                el.innerText = msg;
+                el.className = `feedback-area show ${type}`;
+            },
+            readAloud() {
+                const level = gameData[this.state.currentLevelIndex];
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(level.content);
+                    utterance.lang = 'zh-CN';
+                    // --- 关键修改开始 ---
+                    // 1. 尝试获取男声
+                    const voices = window.speechSynthesis.getVoices();
+                    let maleVoice = null;
+                    // 策略A: 优先寻找明确带有 "Male" 或 "Kangkang" (Windows常见男声) 的语音
+                    maleVoice = voices.find(v => 
+                        (v.name.includes('Male') || v.name.includes('Kangkang')) && 
+                        v.lang.includes('zh')
+                    );
+                    // 策略B: 如果没找到明确男声，尝试筛选掉常见的女声名字
+                    if (!maleVoice) {
+                        const commonFemaleNames = ['Huihui', 'Yaoyao', 'Xiaoxiao', 'Ting-Ting', 'Mei-Jia'];
+                        maleVoice = voices.find(v => 
+                            v.lang.includes('zh') && 
+                            !commonFemaleNames.some(name => v.name.includes(name))
+                        );
                     }
-                },
-                readPoem() {
-                    const utterance = new SpeechSynthesisUtterance(this.levels[this.currentLevel].content);
-                    speechSynthesis.speak(utterance);
+                    // 策略C: 降级使用任意中文语音
+                    if (!maleVoice) {
+                        maleVoice = voices.find(v => v.lang.includes('zh'));
+                    }
+                    if (maleVoice) {
+                        utterance.voice = maleVoice;
+                    }
+                    // 2. 调整语调参数以模拟"抑扬顿挫"和"男性感"
+                    // 语速 0.8: 稍微放慢，有助于体现诗词的韵律感，避免像赶时间
+                    utterance.rate = 0.8; 
+                    // 音调 0.9: 比默认略低，声音听起来更浑厚沉稳，适合男声和古诗氛围
+                    utterance.pitch = 0.9;
+                    // --- 关键修改结束 ---
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    alert('您的浏览器不支持朗读功能');
+                }
+            },
+            renderLevels() {
+                const container = document.getElementById('level-list');
+                container.innerHTML = '';
+                gameData.forEach((level, index) => {
+                    const isCompleted = this.state.completedLevels.includes(index);
+                    const card = document.createElement('div');
+                    card.className = `level-card ${isCompleted ? 'completed' : ''}`;
+                    card.onclick = () => this.startLevel(index);
+                    card.innerHTML = `
+                        <div class="status-icon">${isCompleted ? '🌟' : '🔒'}</div>
+                        <div class="level-name">${level.name}</div>
+                    `;
+                    container.appendChild(card);
+                });
+                this.updateProgressUI();
+            },
+            updateProgressUI() {
+                const total = gameData.length;
+                const completed = this.state.completedLevels.length;
+                const percent = (completed / total) * 100;
+                document.getElementById('progress-text').innerText = `${completed}/${total}`;
+                document.getElementById('progress-bar').style.width = `${percent}%`;
+            }
+        };
+        // Confetti Logic
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        function fireConfetti() {
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 20,
+                    vy: (Math.random() - 0.5) * 20 - 5,
+                    life: 100 + Math.random() * 50,
+                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                    size: Math.random() * 5 + 5
+                });
+            }
+            requestAnimationFrame(updateConfetti);
+        }
+        function updateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.5; 
+                p.life--;
+                p.size *= 0.96;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                if (p.life <= 0 || p.size < 0.5) {
+                    particles.splice(i, 1);
+                    i--;
                 }
             }
-        });
+            if (particles.length > 0) {
+                requestAnimationFrame(updateConfetti);
+            }
+        }
+        app.init();
     </script>
 </body>
 </html>
